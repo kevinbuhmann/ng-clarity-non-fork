@@ -1,0 +1,65 @@
+name: Push Visual Snapshot Updates
+on:
+  workflow_call:
+    inputs:
+      pr-number:
+        required: true
+        type: string
+      pr-branch:
+        required: true
+        type: string
+    outputs:
+      status:
+        value: ${{jobs.push-visual-snapshot-updates.outputs.status}}
+      commit-sha:
+        description: 'The second output string'
+        value: ${{jobs.push-visual-snapshot-updates.outputs.commit-sha}}
+jobs:
+  push-visual-snapshot-updates:
+    name: Push Visual Snapshot Updates
+    runs-on: ubuntu-latest
+    outputs:
+      status: ${{steps.push-changes.outputs.status}}
+      commit-sha: ${{steps.push-changes.outputs.commit-sha}}
+    steps:
+      - name: Download Changes
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: visual-snapshot-update.diff
+          path: visual-snapshot-update.diff
+          workflow: ${{github.event.workflow_run.workflow_id}}
+          run_id: ${{github.event.workflow_run.id}}
+          if_no_artifact_found: ignore
+      - name: Push Changes
+        id: push-changes
+        run: |
+          upstream=https://github.com/${{github.repository}}.git
+          updateBranchName=vrt-update/pr-${{inputs.pr-number}}
+
+          if test -f visual-snapshot-update.diff
+            # configure git
+            git config user.name "GitHub"
+            git config user.email "noreply@github.com"
+
+            # apply changes
+            cat visual-snapshot-update.diff | git apply
+            rm visual-snapshot-update.diff
+
+            # commit changes
+            git add .
+            git commit --message 'chore: update vrt snapshots for `${{inputs.pr-branch}}`'
+
+            # push changes
+            git push $upstream head:refs/heads/$updateBranchName --force
+
+            # set step outputs
+            echo "status=pushed" >> $GITHUB_OUTPUT
+            echo "commit-sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+          then
+          else
+            # delete branch if it exists
+            git push $upstream -d $updateBranchName || echo "branch doesn't exit"
+
+            # set step outputs
+            echo "status=none" >> $GITHUB_OUTPUT
+          fi
