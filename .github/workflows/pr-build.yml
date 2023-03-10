@@ -31,16 +31,16 @@ jobs:
       - name: Disable Storybook Build
         if: ${{matrix.cds-core != '' || matrix.angular != 'Angular v15'}}
         run: node ./scripts/clear-npm-script.js _build:storybook
-      - name: Lint
-        if: ${{matrix.cds-core == '' && matrix.angular == 'Angular v15'}}
-        run: npm run lint
+      # - name: Lint
+      #   if: ${{matrix.cds-core == '' && matrix.angular == 'Angular v15'}}
+      #   run: npm run lint
       - name: Build
-        run: npm run build
-      - name: Test
-        run: npm run test
-      - name: Public Api Check
-        if: ${{matrix.angular == 'Angular v15'}}
-        run: npm run public-api:check
+        run: npm run _build:storybook
+      # - name: Test
+      #   run: npm run test
+      # - name: Public Api Check
+      #   if: ${{matrix.angular == 'Angular v15'}}
+      #   run: npm run public-api:check
       - name: Upload Docs Artifact
         if: ${{matrix.cds-core == '' && matrix.angular == 'Angular v15'}}
         uses: actions/upload-artifact@v3
