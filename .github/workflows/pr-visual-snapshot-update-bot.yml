@@ -1,0 +1,73 @@
+name: PR Visual Snapshot Update Bot
+on:
+  workflow_run:
+    workflows: [PR Build]
+jobs:
+  pr-visual-snapshot-update-bot:
+    if: ${{github.event.workflow_run.conclusion == 'failure'}}
+    name: PR Visual Snapshot Update Bot
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Changes
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: visual-snapshot-updates.diff
+          path: visual-snapshot-updates.diff
+          workflow: ${{github.event.workflow_run.workflow_id}}
+          run_id: ${{github.event.workflow_run.id}}
+          if_no_artifact_found: ignore
+      - name: Push Changes
+        id: push-changes
+        run: |
+          upstream=https://github.com/${{github.repository}}.git
+          updateBranchName=vrt-update/pr-${{inputs.pr-number}}
+
+          if test -f visual-snapshot-updates.diff
+          then
+            # configure git
+            git config user.name "GitHub"
+            git config user.email "noreply@github.com"
+
+            # apply changes
+            cat visual-snapshot-updates.diff | git apply
+            rm visual-snapshot-updates.diff
+
+            # commit changes
+            git add .
+            git commit --message 'chore: update vrt snapshots for `${{inputs.pr-branch}}`'
+
+            # push changes
+            git push $upstream head:refs/heads/$updateBranchName --force
+
+            # set step outputs
+            echo "changes-pushed=true" >> $GITHUB_OUTPUT
+            echo "commit-sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+          else
+            # delete branch if it exists
+            git push $upstream -d $updateBranchName || echo "branch doesn't exit"
+
+            # set step outputs
+            echo "changes-pushed=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Get PR Event
+        id: get-pr-event
+        if: ${{steps.push-changes.outputs.changes-pushed}}
+        uses: potiuk/get-workflow-origin@v1_3
+        with:
+          token: ${{secrets.GITHUB_TOKEN}}
+          sourceRunId: ${{github.event.workflow_run.id}}
+      - name: Comment
+        if: ${{steps.push-changes.outputs.changes-pushed}}
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          issue-number: ${{steps.get-pr-event.outputs.pullRequestNumber}}
+          body: |
+            This PR introduces visual changes: ${{steps.push-changes.outputs.commit-sha}}
+            If these changes are intended and correct, please cherry-pick the above commit to this PR.
+
+            ```
+            git checkout ${{steps.get-pr-event.outputs.sourceHeadBranch}}
+            git fetch https://github.com/${{github.repository}}.git ${{steps.push-changes.outputs.commit-sha}}
+            git cherry-pick ${{steps.push-changes.outputs.commit-sha}}
+            git push
+            ```
