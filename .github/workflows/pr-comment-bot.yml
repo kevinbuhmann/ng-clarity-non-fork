@@ -73,3 +73,43 @@ jobs:
 
             🤖 Clarity Release Bot
           edit-mode: replace
+      - name: Find Comment (Visual Regression Test)
+        id: find-visual-regression-test-bot-comment
+        uses: peter-evans/find-comment@v1
+        with:
+          issue-number: ${{steps.get-pr-event.outputs.pullRequestNumber}}
+          comment-author: 'github-actions[bot]'
+          body-includes: 🤖 Clarity Visual Regression Test Bot
+      - name: Build Started PR Comment (Visual Regression Test)
+        if: ${{github.event.action == 'requested'}}
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          comment-id: ${{steps.find-visual-regression-test-bot-comment.outputs.comment-id}}
+          issue-number: ${{steps.get-pr-event.outputs.pullRequestNumber}}
+          body: |
+            👋 @${{github.event.sender.login}},
+
+            * 🙏 The Clarity team thanks you for opening a pull request
+            * ⏳ The visual regression test for this PR will start when the build finishes
+            * 📫 I'll update this comment when the visual regression test has started
+
+            Thank you,
+
+            🤖 Clarity Visual Regression Test Bot
+          edit-mode: replace
+      - name: Build Failed PR Comment (Visual Regression Test)
+        if: ${{github.event.workflow_run.conclusion == 'failure'}}
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          comment-id: ${{steps.find-visual-regression-test-bot-comment.outputs.comment-id}}
+          issue-number: ${{steps.get-pr-event.outputs.pullRequestNumber}}
+          body: |
+            👋 @${{github.event.sender.login}},
+
+            * 😭 The build for this PR has failed
+            * 🗒 Please fix the build failure in order to run the visual regression test
+
+            Thank you,
+
+            🤖 Clarity Visual Regression Test Bot
+          edit-mode: replace
