@@ -1,0 +1,82 @@
+name: PR Visual Regression Test
+on:
+  workflow_run:
+    workflows: [PR Build]
+    types:
+      - completed
+jobs:
+  pr-visual-regression-test:
+    if: ${{github.event.workflow_run.conclusion == 'success'}}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: haya14busa/action-workflow_run-status@v1
+      - name: Get PR Event
+        id: get-pr-event
+        uses: potiuk/get-workflow-origin@v1_3
+        with:
+          token: ${{secrets.GITHUB_TOKEN}}
+          sourceRunId: ${{github.event.workflow_run.id}}
+      - name: Find Comment
+        id: find-comment
+        uses: peter-evans/find-comment@v1
+        with:
+          issue-number: ${{steps.get-pr-event.outputs.pullRequestNumber}}
+          comment-author: 'github-actions[bot]'
+          body-includes: 🤖 Clarity Visual Regression Test Bot
+      - name: Download Changes
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: visual-snapshot-update.diff
+          path: visual-snapshot-update.diff
+          workflow: ${{github.event.workflow_run.workflow_id}}
+          run_id: ${{github.event.workflow_run.id}}
+          if_no_artifact_found: ignore
+      - name: Check for Changes
+        id: diff
+        run: |
+          if test -f visual-snapshot-update.diff
+          then
+            echo "status=clean" >> $GITHUB_OUTPUT
+          else
+            echo "status=dirty" >> $GITHUB_OUTPUT
+          fi
+      - name: Update Comment if Changes Needed
+        if: ${{steps.diff.outputs.status == 'dirty'}}
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          comment-id: ${{steps.find-comment.outputs.comment-id}}
+          issue-number: ${{steps.get-pr-event.outputs.pullRequestNumber}}
+          body: |
+            👋 @${{github.event.sender.login}},
+
+            * 😭 The visual regression test for this PR has failed due to modified visual snapshots
+            * 🗒 Please see the updated visual snapshots in this commit: ${{steps.push-changes.outputs.update-sha}}
+
+            If these changes are intended and correct, please cherry-pick the above commit to the PR.
+
+            ```
+            git checkout ${{steps.get-pr-event.outputs.sourceHeadBranch}}
+            git fetch https://github.com/${{github.repository}}.git ${{steps.push-changes.outputs.update-sha}}
+            git cherry-pick ${{steps.push-changes.outputs.update-sha}}
+            git push
+            ```
+
+            Thank you,
+
+            🤖 Clarity Visual Regression Test Bot
+          edit-mode: replace
+      - name: Update Comment if Changes Not Needed
+        if: ${{steps.diff.outputs.status == 'clean'}}
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          comment-id: ${{steps.find-comment.outputs.comment-id}}
+          issue-number: ${{steps.get-pr-event.outputs.pullRequestNumber}}
+          body: |
+            👋 @${{github.event.sender.login}},
+
+            * 🎉 The visual regression test for this PR has succeeded
+
+            Thank you,
+
+            🤖 Clarity Visual Regression Test Bot
+          edit-mode: replace
