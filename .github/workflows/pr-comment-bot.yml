@@ -13,18 +13,25 @@ jobs:
         with:
           token: ${{secrets.GITHUB_TOKEN}}
           sourceRunId: ${{github.event.workflow_run.id}}
-      - name: Find Comment
-        id: find-comment
+      - name: Find Release Bot Comment
+        id: find-release-bot-comment
         uses: peter-evans/find-comment@v1
         with:
           issue-number: ${{steps.get-pr-event.outputs.pullRequestNumber}}
           comment-author: 'github-actions[bot]'
           body-includes: 🤖 Clarity Release Bot
+      - name: Find Visual Regression Test Bot Comment
+        id: find-visual-regression-test-bot-comment
+        uses: peter-evans/find-comment@v1
+        with:
+          issue-number: ${{steps.get-pr-event.outputs.pullRequestNumber}}
+          comment-author: 'github-actions[bot]'
+          body-includes: 🤖 Clarity Visual Regression Test Bot
       - name: Build Started PR Comment
         if: ${{github.event.action == 'requested'}}
         uses: peter-evans/create-or-update-comment@v1
         with:
-          comment-id: ${{steps.find-comment.outputs.comment-id}}
+          comment-id: ${{steps.find-release-bot-comment.outputs.comment-id}}
           issue-number: ${{steps.get-pr-event.outputs.pullRequestNumber}}
           body: |
             👋 @${{github.event.sender.login}},
@@ -37,11 +44,28 @@ jobs:
 
             🤖 Clarity Release Bot
           edit-mode: replace
+      - name: Build Started PR Comment (Visual Regression Test)
+        if: ${{github.event.action == 'requested'}}
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          comment-id: ${{steps.find-visual-regression-test-bot-comment.outputs.comment-id}}
+          issue-number: ${{steps.get-pr-event.outputs.pullRequestNumber}}
+          body: |
+            👋 @${{github.event.sender.login}},
+
+            * 🙏 The Clarity team thanks you for opening a pull request
+            * ⏳ The visual regression test for this PR will start when the PR build finishes
+            * 📫 I'll update this comment when the visual regression test has started
+
+            Thank you,
+
+            🤖 Clarity Visual Regression Test Bot
+          edit-mode: replace
       - name: Build Succeeded PR Comment
         if: ${{github.event.workflow_run.conclusion == 'success'}}
         uses: peter-evans/create-or-update-comment@v1
         with:
-          comment-id: ${{steps.find-comment.outputs.comment-id}}
+          comment-id: ${{steps.find-release-bot-comment.outputs.comment-id}}
           issue-number: ${{steps.get-pr-event.outputs.pullRequestNumber}}
           body: |
             👋 @${{github.event.sender.login}},
@@ -60,7 +84,7 @@ jobs:
         if: ${{github.event.workflow_run.conclusion == 'failure'}}
         uses: peter-evans/create-or-update-comment@v1
         with:
-          comment-id: ${{steps.find-comment.outputs.comment-id}}
+          comment-id: ${{steps.find-release-bot-comment.outputs.comment-id}}
           issue-number: ${{steps.get-pr-event.outputs.pullRequestNumber}}
           body: |
             👋 @${{github.event.sender.login}},
