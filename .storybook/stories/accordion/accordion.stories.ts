@@ -41,8 +41,8 @@ const defaultParameters: Parameters = {
     openIndices: [],
     createArray: n => new Array(n),
     panelCount: 4,
-    title: 'Title',
-    content: 'Hello World!',
+    title: 'Panel Title',
+    content: 'Panel Content',
   },
 };
 
