@@ -55,7 +55,7 @@ const defaultParameters: Parameters = {
     // story helpers
     inMenuIndices: [true, false, false, true],
     createArray: n => new Array(n),
-    content: 'Hello World!',
+    content: 'Button',
     buttonCount: 3,
     inMenuButtonCount: 3,
   },
