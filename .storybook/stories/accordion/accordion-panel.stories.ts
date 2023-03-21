@@ -4,7 +4,7 @@
  * The full license information can be found in LICENSE in the root directory of this project.
  */
 
-import { ClrAccordionModule, ClrAccordionPanel } from '@clr/angular';
+import { ClrAccordionModule, ClrAccordionPanel } from '@clr/angula';
 import { action } from '@storybook/addon-actions';
 import { Parameters } from '@storybook/addons';
 import { Story } from '@storybook/angular';
