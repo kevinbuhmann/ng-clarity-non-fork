@@ -18,6 +18,8 @@ for (const storyId of storyIds) {
         animations: 'disabled',
         caret: 'hide',
         fullPage: true,
+        maxDiffPixelRatio: 0,
+        threshold: 0,
       });
     });
   }
