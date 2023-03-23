@@ -77,6 +77,10 @@ const defaultParameters: Parameters = {
   },
 };
 
-const variants: Parameters[] = [];
+const variants: Parameters[] = [
+  {
+    clrModalOpen: true,
+  },
+];
 
 setupStorybook(ClrModalModule, defaultStory, defaultParameters, variants);
