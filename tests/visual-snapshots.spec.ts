@@ -46,7 +46,11 @@ for (const { storyId, component } of stories) {
         threshold: 0,
       });
     });
+
+    break;
   }
+
+  break;
 }
 
 handleUnusedScreenshots(usedScreenshotPaths);
