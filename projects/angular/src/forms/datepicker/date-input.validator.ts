@@ -16,7 +16,7 @@ import { DateIOService } from './providers/date-io.service';
 export class ClrDateInputValidator implements Validator {
   constructor(@Optional() private dateIOService: DateIOService) {}
 
-  validate(control: AbstractControl): ValidationErrors {
+  validate(control: AbstractControl): ValidationError {
     if (this.dateIOService) {
       const value = this.dateIOService.getDateValueFromDateString(control.value);
       const minDate = this.dateIOService.disabledDates.minDate.toDate();
