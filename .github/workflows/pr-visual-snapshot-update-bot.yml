@@ -3,6 +3,7 @@ on:
   workflow_run:
     workflows: [PR Build]
 jobs:
+  # push visual snapshot updates (or delete branch) after an unsuccessful build
   pr-visual-snapshot-update-bot:
     if: ${{github.event.workflow_run.conclusion == 'failure'}}
     name: PR Visual Snapshot Update Bot
@@ -71,3 +72,26 @@ jobs:
             git cherry-pick ${{steps.push-changes.outputs.commit-sha}}
             git push
             ```
+
+  # delete visual snapshot update branch (if it exists) after a successful build
+  pr-visual-snapshot-cleanup-bot:
+    if: ${{github.event.workflow_run.conclusion == 'success'}}
+    name: PR Visual Snapshot Update Bot
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Get PR Event
+        id: get-pr-event
+        uses: potiuk/get-workflow-origin@v1_5
+        with:
+          token: ${{secrets.GITHUB_TOKEN}}
+          sourceRunId: ${{github.event.workflow_run.id}}
+      - name: Push Changes
+        id: push-changes
+        run: |
+          repositoryUrl=${{github.server_url}}/${{github.repository}}.git
+          updateBranchName=visual-snapshot-update/pr-${{steps.get-pr-event.outputs.pullRequestNumber}}
+
+          # delete branch if it exists
+          git push $repositoryUrl -d $updateBranchName || true
