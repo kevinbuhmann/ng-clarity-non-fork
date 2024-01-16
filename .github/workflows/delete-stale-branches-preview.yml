@@ -8,13 +8,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Delete visual snapshot branches
+        id: delete_branches
         uses: phpdocker-io/github-actions-delete-abandoned-branches@v2
         with:
           github_token: ${{ github.token }}
           last_commit_age_days: 120
           allowed_prefixes: visual-snapshot-update/pr-
           ignore_branches: main,next,beta,15.x,13.x
-          # Disable dry run and actually get stuff deleted
           dry_run: yes
       - name: Get output
-        run: "echo 'Deleted branches: ${{ steps.delete_stuff.outputs.deleted_branches }}'"
+        run: "echo 'Deleted branches: ${{ steps.delete_branches.outputs.deleted_branches }}'"
