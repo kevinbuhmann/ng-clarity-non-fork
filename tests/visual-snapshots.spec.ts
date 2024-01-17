@@ -54,6 +54,8 @@ for (const { storyId, component } of stories) {
       });
     });
   }
+
+  break;
 }
 
 const takeFullPageScreenshot = (component, storyName) => {
