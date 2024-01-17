@@ -27,7 +27,7 @@ for (const { storyId, component } of stories) {
   for (const [themeKey, theme] of Object.entries(THEMES)) {
     const normalizedThemeKey = themeKey.toLowerCase().replace(/_/g, '-');
 
-    const screenshotPath = path.join(component, `${storyName}-${normalizedThemeKey}.png`);
+    const screenshotPath = path.join(normalizedThemeKey, component, `${storyName}.png`);
     usedScreenshotPaths.push(screenshotPath);
 
     test(screenshotPath, async ({ page }) => {
