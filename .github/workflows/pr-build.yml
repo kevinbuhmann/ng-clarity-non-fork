@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        angular: ['Angular v15', 'Angular v16']
+        angular: ['Angular v16']
     steps:
       - name: Checkout
         uses: actions/checkout@v3
