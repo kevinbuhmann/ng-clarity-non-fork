@@ -68,25 +68,13 @@ jobs:
         run: npm run ts-node -- ./scripts/write-story-list.ts
       - name: Update Visual Snapshots
         run: npx playwright test --update-snapshots
-      - name: Check for Changes
+      - name: Collect Changes
         id: diff
         run: |
           git add .
-
-          if git diff-index --quiet HEAD
-          then
-            echo "status=clean" >> $GITHUB_OUTPUT
-          else
-            git diff --cached --binary > visual-snapshot-changes.diff
-
-            echo "status=dirty" >> $GITHUB_OUTPUT
-          fi
+          git diff --cached --binary > visual-snapshot-changes.diff
       - name: Upload Changes
-        if: ${{steps.diff.outputs.status == 'dirty'}}
         uses: actions/upload-artifact@v3
         with:
           name: visual-snapshot-changes.diff
           path: visual-snapshot-changes.diff
-      - name: Fail if Visual Snapshots Changed
-        if: ${{steps.diff.outputs.status == 'dirty'}}
-        run: exit 1

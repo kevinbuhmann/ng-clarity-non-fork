@@ -9,7 +9,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { THEMES } from '../.storybook/helpers/constants';
-import { handleUnusedScreenshots } from './helpers/handle-unused-screenshots';
 import { Story } from './helpers/story.interface';
 import { ScreenshotOptions } from './screenshot-options';
 
@@ -62,4 +61,4 @@ const takeFullPageScreenshot = (component, storyName) => {
   return ScreenshotOptions[component]?.fullPageScreenshot || ScreenshotOptions[storyName]?.fullPageScreenshot;
 };
 
-handleUnusedScreenshots(usedScreenshotPaths);
+fs.writeFileSync('./tests/snapshots/used-screenshot-paths.txt', usedScreenshotPaths.join('\n'));
