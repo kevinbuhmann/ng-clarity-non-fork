@@ -22,7 +22,7 @@
   }
 
   .clr-accordion-header {
-    color: accordion-variables.$clr-accordion-text-color;
+    color: var(--cds-global-color-black);
     box-shadow: accordion-variables.$clr-accordion-header-left-indicator;
     background: accordion-variables.$clr-accordion-header-background-color;
     transition: all 200ms ease-in-out;
