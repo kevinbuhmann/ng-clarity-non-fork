@@ -50,7 +50,7 @@ const template = `
         {{ title }} {{ i + 1 }} {{ alignmentTest && i === 2 ? '(alignment test)' : '' }}
       </clr-accordion-title>
       <clr-accordion-description *ngIf="showDescriptions">Panel {{ i + 1 }} description.</clr-accordion-description>
-      <clr-accordion-content>{{ content }} {{ i + 1 }}</clr-accordion-content>
+      <clr-accordion-content>{{ content }} {{ i + 1 }} new text to make screenshots change</clr-accordion-content>
     </clr-accordion-panel>
   </clr-accordion>
 `;
